@@ -1,21 +1,23 @@
-cmake_minimum_required(VERSION 3.27.3)
+cmake_minimum_required(VERSION 3.27.2)
 
-project(scop)
+set(PROJECT_NAME scop)
+set(CMAKE_CXX_STANDARD 17)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+project(${PROJECT_NAME})
 
-link_directories(${PROJECT_SOURCE_DIR}/lib)
+add_executable(${PROJECT_NAME} src/main.cpp)
 
-set(SOURCES
-    srcs/main.cpp
-    srcs/glad.c
-)
+# ExternalProject 관련 명령어 셋 추가
+include(ExternalProject)
 
-add_executable(${PROJECT_NAME} ${SOURCES})
+include(Dependency.cmake)
 
-target_link_libraries(${PROJECT_NAME} 
-    libglfw.3.dylib
-    # -framework Cocoa
-    # -framework OpenGL
-    # -framework IOKit
-)
+# 우리 프로젝트에 include / lib 관련 옵션 추가
+target_include_directories(${PROJECT_NAME} PUBLIC ${DEP_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${DEP_INSTALL_DIR})
+target_link_directories(${PROJECT_NAME} PUBLIC ${DEP_LIB_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${DEP_LIBS})
+
+# Dependency들이 먼저 build 될 수 있게 관계 설정
+add_dependencies(${PROJECT_NAME} ${DEP_LIST})
+
