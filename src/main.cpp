@@ -18,7 +18,7 @@ int main() {
     }
 
     SPDLOG_INFO("Create glfw window");
-    auto window = glfwCreateWindow(600, 400, "scop", NULL, NULL);
+    auto window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, NULL, NULL);
     if (!window) {
         SPDLOG_ERROR("failed to create glfw window");
         glfwTerminate();
