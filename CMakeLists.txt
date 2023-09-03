@@ -24,6 +24,8 @@ add_executable(${PROJECT_NAME}
     src/main.cpp 
     src/common.cpp src/common.hpp
     src/shader.cpp src/shader.hpp
+    src/program.cpp src/program.hpp
+    src/context.cpp src/context.hpp
     )
 
 # ExternalProject 관련 명령어 셋 추가

@@ -1,6 +1,6 @@
-#include "common.hpp"
-#include "shader.hpp"
-#include "program.hpp"
+#include "context.hpp"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 // #include <spdlog/spdlog.h>
@@ -77,23 +77,19 @@ int main(int ac, char **av) {
     auto glVersion = glGetString(GL_VERSION);
     std::cout << "OpenGl context version: " << glVersion << std::endl;
 
-    // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
-    ShaderPtr vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
-    ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
-    SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
-    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
-
-    // program의 인자에는 sharedPtr로 들어가야하므로, 이에 맞춰서 설정하고, program을 생성함.
-    auto program = Program::Create({fragmentShader, vertexShader});
-    SPDLOG_INFO("program id: {}", program->Get());
+    // shader와 program을 context 객체를 통해서 관리.
+    // unique_ptr의 reset 함수를 통해 메모리 관리를 용이하게 함.
+    auto context = Context::Create();
+    if (!context) {
+        SPDLOG_ERROR("failed to create context");
+        glfwTerminate();
+        return -1;
+    }
 
     while (!glfwWindowShouldClose(window)) {
         // 아래 루프문에서 event가 발생시 해당 event를 수집함.
         glfwPollEvents();
-        // window를 clear할때 clear할 색상 지정.
-        glClearColor(0.0f, 0.1f, 0.2f, 0.0f);
-        // 실제 framebuffer를 clear함.
-        glClear(GL_COLOR_BUFFER_BIT);
+        context->Render();
         /*
             Framebuffer swap은 화면에 그림을 그리는 과정으로,
             프레임 버퍼를 2개를 준비하여(front / back)
@@ -104,6 +100,8 @@ int main(int ac, char **av) {
         */
         glfwSwapBuffers(window);
     }
+    // std::unique_ptr의 reset() 함수를 통해 메모리를 정리.
+    context.reset();
 
     glfwTerminate();
     return 0;
