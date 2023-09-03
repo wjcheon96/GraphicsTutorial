@@ -1,5 +1,6 @@
 #include "common.hpp"
 #include "shader.hpp"
+#include "program.hpp"
 #include <iostream>
 
 // #include <spdlog/spdlog.h>
@@ -77,10 +78,14 @@ int main(int ac, char **av) {
     std::cout << "OpenGl context version: " << glVersion << std::endl;
 
     // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
-    auto vertexShader = Shader::CreateFromFIle("./shader/simple.vs", GL_VERTEX_SHADER);
-    auto fragmentShader = Shader::CreateFromFIle("./shader/simple.fs", GL_FRAGMENT_SHADER);
+    ShaderPtr vertexShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
+    ShaderPtr fragmentShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
     SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
     SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
+
+    // program의 인자에는 sharedPtr로 들어가야하므로, 이에 맞춰서 설정하고, program을 생성함.
+    auto program = Program::Create({fragmentShader, vertexShader});
+    SPDLOG_INFO("program id: {}", program->Get());
 
     while (!glfwWindowShouldClose(window)) {
         // 아래 루프문에서 event가 발생시 해당 event를 수집함.

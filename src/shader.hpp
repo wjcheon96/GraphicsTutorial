@@ -7,7 +7,7 @@ CLASS_PTR(Shader);
 
 class Shader {
     public:
-        static ShaderUPtr CreateFromFIle(const std::string& filename, GLenum shaderType);
+        static ShaderUPtr CreateFromFile(const std::string& filename, GLenum shaderType);
 
         ~Shader();
         // shader 오브젝트의 생성 관리는 Shader 내부에서만 관리.

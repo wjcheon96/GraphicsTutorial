@@ -1,6 +1,6 @@
 #include "shader.hpp"
 
-ShaderUPtr Shader::CreateFromFIle(const std::string& filename, GLenum shaderType) {
+ShaderUPtr Shader::CreateFromFile(const std::string& filename, GLenum shaderType) {
     auto shader = ShaderUPtr(new Shader());
     if (!shader->LoadFile(filename, shaderType))
         return nullptr;
