@@ -1,4 +1,5 @@
-#include "common.h"
+#include "common.hpp"
+#include "shader.hpp"
 #include <iostream>
 
 // #include <spdlog/spdlog.h>
@@ -22,7 +23,7 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
         action == GLFW_REPEAT ? " Repeat" : "Unknown",
         mods & GLFW_MOD_CONTROL ? "C" : "-",
         mods & GLFW_MOD_SHIFT ? "S" : "-",
-        mods&GLFW_MOD_ALT ? "A" : "-");
+        mods & GLFW_MOD_ALT ? "A" : "-");
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -75,6 +76,12 @@ int main(int ac, char **av) {
     auto glVersion = glGetString(GL_VERSION);
     std::cout << "OpenGl context version: " << glVersion << std::endl;
 
+    // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
+    auto vertexShader = Shader::CreateFromFIle("./shader/simple.vs", GL_VERTEX_SHADER);
+    auto fragmentShader = Shader::CreateFromFIle("./shader/simple.fs", GL_FRAGMENT_SHADER);
+    SPDLOG_INFO("vertex shader id: {}", vertexShader->Get());
+    SPDLOG_INFO("fragment shader id: {}", fragmentShader->Get());
+
     while (!glfwWindowShouldClose(window)) {
         // 아래 루프문에서 event가 발생시 해당 event를 수집함.
         glfwPollEvents();
@@ -91,7 +98,6 @@ int main(int ac, char **av) {
             double buffering이라고 함.
         */
         glfwSwapBuffers(window);
-
     }
 
     glfwTerminate();

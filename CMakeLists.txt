@@ -20,7 +20,11 @@ endif()
 # 프로젝트 이름 설정
 project(${PROJECT_NAME})
 # 실행파일의 이름 설정
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} 
+    src/main.cpp 
+    src/common.cpp src/common.hpp
+    src/shader.cpp src/shader.hpp
+    )
 
 # ExternalProject 관련 명령어 셋 추가
 include(Dependency.cmake)
