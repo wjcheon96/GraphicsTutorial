@@ -1,4 +1,4 @@
-#include "program.hpp"
+#include "Program.hpp"
 
 ProgramUPtr Program::Create(const std::vector<ShaderPtr>& shaders) {
     auto program = ProgramUPtr(new Program());
@@ -33,4 +33,8 @@ Program::~Program() {
         // m_program이 0이 아니면 무언가 있는 상태이므로, 해당 프로그램을 지움.
         glDeleteProgram(m_program);
     }
+}
+
+void Program::Use() const {
+    glUseProgram(m_program);
 }

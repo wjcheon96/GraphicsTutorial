@@ -1,8 +1,8 @@
 #ifndef __PROGRAM_HPP__
 #define __PROGRAM_HPP__
 
-#include "common.hpp"
-#include "shader.hpp"
+#include "Common.hpp"
+#include "Shader.hpp"
 
 CLASS_PTR(Program)
 class Program {
@@ -12,7 +12,8 @@ class Program {
         // reference 및 sharedpointer 형태를 사용하여(ShaderPtr) 다른 프로그램을 만드는데 재사용이 가능하게끔 함.
         static ProgramUPtr Create(const std::vector<ShaderPtr>& shaders);
         ~Program();
-        uint32_t Get() const { return m_program; }    
+        uint32_t Get() const { return m_program; }
+        void Use() const;
     private:
         Program() {}
         // 초기화를 하는데 쓰일 link 함수.

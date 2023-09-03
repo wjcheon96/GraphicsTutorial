@@ -1,7 +1,7 @@
 #ifndef __SHADER_HPP__
 #define __SHADER_HPP__
 
-#include "common.hpp"
+#include "Common.hpp"
 
 CLASS_PTR(Shader);
 

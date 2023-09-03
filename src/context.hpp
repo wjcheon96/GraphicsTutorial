@@ -1,9 +1,11 @@
 #ifndef __CONTEXT_HPP__
 #define __CONTEXT_HPP__
 
-#include "common.hpp"
-#include "shader.hpp"
-#include "program.hpp"
+#include "Common.hpp"
+#include "Shader.hpp"
+#include "Program.hpp"
+#include "Buffer.hpp"
+#include "VertexLayout.hpp"
 
 
 CLASS_PTR(Context)
@@ -16,9 +18,9 @@ class Context {
         bool Init();
 
         ProgramUPtr m_program;
-        uint32_t m_vertexArrayObject;
-        uint32_t m_vertexBuffer;
-        uint32_t m_indexBuffer;
+        VertexLayoutUPtr m_vertexLayout;
+        BufferUPtr m_vertexBuffer;
+        BufferUPtr m_indexBuffer;
 };
 
 

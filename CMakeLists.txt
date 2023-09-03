@@ -22,10 +22,12 @@ project(${PROJECT_NAME})
 # 실행파일의 이름 설정
 add_executable(${PROJECT_NAME} 
     src/main.cpp 
-    src/common.cpp src/common.hpp
-    src/shader.cpp src/shader.hpp
-    src/program.cpp src/program.hpp
-    src/context.cpp src/context.hpp
+    src/Common.cpp src/Common.hpp
+    src/Shader.cpp src/Shader.hpp
+    src/Program.cpp src/Program.hpp
+    src/Context.cpp src/Context.hpp
+    src/Buffer.cpp src/Buffer.hpp
+    src/VertexLayout.cpp src/VertexLayout.hpp
     )
 
 # ExternalProject 관련 명령어 셋 추가
