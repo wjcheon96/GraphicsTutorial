@@ -34,6 +34,7 @@ bool Context::Init() {
     m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
         GL_STATIC_DRAW, indices, sizeof(uint32_t) * 6);
 
+
     // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
     ShaderPtr vertShader = Shader::CreateFromFile("./shader/simple.vs", GL_VERTEX_SHADER);
     ShaderPtr fragShader = Shader::CreateFromFile("./shader/simple.fs", GL_FRAGMENT_SHADER);
@@ -47,6 +48,13 @@ bool Context::Init() {
     if (!m_program)
         return false;
     SPDLOG_INFO("program id: {}", m_program->Get());
+
+    // 프로그램 인스턴스의 아이디를 가져와서 세팅한다.
+    // color라는 string을 집어넣는데, 이는 uniform variable의 변수 명이 된다.
+    // return되는 에 glUniform4f()의 인자로 호출을 해서 가져온다.
+    auto loc = glGetUniformLocation(m_program->Get(), "color");
+    m_program->Use();
+    glUniform4f(loc, 1.0f, 1.0f, 0.0f, 1.0f);
 
     // window를 clear할때 clear할 색상 지정.
     glClearColor(0.0f, 0.1f, 0.2f, 0.0f);
