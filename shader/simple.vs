@@ -1,8 +1,9 @@
 #version 330 core
-// location 0은 VAO attribute 0번을 의미한다.
-layout (location = 0) in vec3 aPos;
+layout (location = 0) in vec3 aPos; // 0번째 attribute가 정점의 위치
+
+out vec4 vertexColor; // fragment shader로 넘어갈 컬러값
 
 void main() {
-  // aPos로 들어오는 data를 vec4에 넣어준다.
-  gl_Position = vec4(aPos, 1.0);
+  gl_Position = vec4(aPos, 1.0); // vec3를 vec4 생성자에 사용, 기본으로 써줘야 한다.
+  vertexColor = vec4(0.5, 0.0, 0.0, 1.0); // 어두운 빨간색을 출력값으로
 }

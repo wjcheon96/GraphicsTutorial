@@ -70,7 +70,7 @@ int main(int ac, char **av) {
         std::cout << "failed to initialize glad" << std::endl;
         glfwTerminate();
         return -1;
-    }
+    } 
 
     // 정상적으로 gl함수가 잘 불려왔는지를 확인한다.
     // opengl function 중에서 가장 기본적인 정보를 가져오는 glGetString을 통해 확인해본다.
