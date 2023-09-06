@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
     src/Buffer.cpp src/Buffer.hpp
     src/VertexLayout.cpp src/VertexLayout.hpp
     src/Image.cpp src/Image.hpp
+    src/Texture.cpp src/Texture.hpp
 )
 
 # ExternalProject 관련 명령어 셋 추가

@@ -6,6 +6,7 @@
 #include "Program.hpp"
 #include "Buffer.hpp"
 #include "VertexLayout.hpp"
+#include "Texture.hpp"
 
 
 CLASS_PTR(Context)
@@ -21,8 +22,7 @@ class Context {
         VertexLayoutUPtr m_vertexLayout;
         BufferUPtr m_vertexBuffer;
         BufferUPtr m_indexBuffer;
-
-        uint32_t m_textures;
+        TextureUPtr m_texture;
 };
 
 
