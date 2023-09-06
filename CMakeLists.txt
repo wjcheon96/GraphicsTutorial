@@ -1,5 +1,5 @@
 # CMake 최소 버전 명시.
-cmake_minimum_required(VERSION 3.27.2)
+cmake_minimum_required(VERSION 3.26.4)
 
 # 프로젝트 이름 및 버전 명시
 set(PROJECT_NAME scop)
@@ -14,7 +14,7 @@ set(WINDOW_HEIGHT 640)
 
 # Mac에서 돌릴때 필요한 추가적인 Flag들.
 if (APPLE)
-    set(CMAKE_CXX_FLAGS "-framework Cocoa -framework IOKit -framework OpenGL -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "-framework Cocoa -framework IOKit -framework OpenGL")
 endif()
 
 # 프로젝트 이름 설정
@@ -28,7 +28,8 @@ add_executable(${PROJECT_NAME}
     src/Context.cpp src/Context.hpp
     src/Buffer.cpp src/Buffer.hpp
     src/VertexLayout.cpp src/VertexLayout.hpp
-    )
+    src/Image.cpp src/Image.hpp
+)
 
 # ExternalProject 관련 명령어 셋 추가
 include(Dependency.cmake)

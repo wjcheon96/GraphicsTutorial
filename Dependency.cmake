@@ -21,8 +21,12 @@ ExternalProject_Add(
 # Dependency 리스트 및 라이브러리 파일 리스트 추가
 set(DEP_LIST ${DEP_LIST} dep_spdlog)
 # OS 별 생성 파일이 .lib 와 .a 파일로 달라지므로, Mac 기준에 맞춰서 해당 디렉토리에 있는 링크를 제대로 맞춰줌.
-set(DEP_LIBS ${DEP_LIBS} libspdlog.a)
-# set(DEP_LIBS ${DEP_LIBS} spdlog$<$<CONFIG:Debug>:d>)
+if (APPLE)
+    set(DEP_LIBS ${DEP_LIBS} libspdlog.a)
+endif()
+if (WIN32)
+    set(DEP_LIBS ${DEP_LIBS} spdlog$<$<CONFIG:Debug>:d>)
+endif()
 
 # glfw 설치
 ExternalProject_Add(
@@ -58,3 +62,24 @@ ExternalProject_Add(
     )
 set(DEP_LIST ${DEP_LIST} dep_glad)
 set(DEP_LIBS ${DEP_LIBS} glad)
+
+# stb 설치
+ExternalProject_Add(
+    dep_stb
+    GIT_REPOSITORY "https://github.com/nothings/stb"
+    GIT_TAG "master"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    # 헤더파일만 가져오기에 build 와 configure를 막아둔다.
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    TEST_COMMAND ""
+    # 대신 install command를 따로 지정한다.
+    # ${CMAKE_COMMAND} -E copy 로 stb_image.h를 복사하기에, cmake 명령어를 통해 사용해서 os간 차이가 없게끔 한다.
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy
+        ${PROJECT_BINARY_DIR}/dep_stb-prefix/src/dep_stb/stb_image.h
+        ${DEP_INSTALL_DIR}/include/stb/stb_image.h
+)
+set(DEP_LIST ${DEP_LIST} dep_stb)
+

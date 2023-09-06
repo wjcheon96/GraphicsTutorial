@@ -33,7 +33,7 @@ bool Shader::LoadFile(const std::string& filename, GLenum shaderType) {
     // 실패시 glGetShaderInfoLog()로 에러 로그 가져오기.
     glGetShaderiv(m_shader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        char infoLog[1024];
+        char infoLog[1024]; 
         glGetShaderInfoLog(m_shader, 1024, nullptr, infoLog);
         SPDLOG_ERROR("failed to compile shader: \"{}\"", filename);
         SPDLOG_ERROR("reason: {}", infoLog);
