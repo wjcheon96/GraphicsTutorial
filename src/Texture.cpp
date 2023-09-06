@@ -22,6 +22,7 @@ void Texture::Bind() const {
 // 뒤에 i는 integer(정수)라는 것을 의미한다.
 // TEXTURE_MIN_FILTER는 이미지가 많이 축소 되었을때, TEXTURE_MAG_FILTER는 많이 커졌을때 쓰는 필터이며, 이를 둘 다 linear로 지정해준다.
 void Texture::SetFilter(uint32_t minFilter, uint32_t magFilter) const {
+    // Mipmap으로 설정시, minFilter보다 작아질 경우, Mipmap에서 만든 level에 맞는 이미지로 변환해서 적용시켜준다.
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 }
@@ -39,7 +40,9 @@ void Texture::CreateTexture() {
     glGenTextures(1, &m_texture);
     // bind and set default filter and wrap option
     Bind();
-    SetFilter(GL_LINEAR, GL_LINEAR);
+    // GL_LINEAR_MIPMAP_LINEAR로 MIPMAP으로 필터를 바꿔준다.
+    SetFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
+    // SetFilter(GL_LINEAR, GL_LINEAR);
     SetWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
 }
 
@@ -68,4 +71,8 @@ void Texture::SetTextureFromImage(const Image* image) {
         image->GetWidth(), image->GetHeight(), 0,
         format, GL_UNSIGNED_BYTE,
         image->GetData());
+
+    // 바인딩한 GL_TEXTURE_2D를 Mipmap의 형태로 만들어준다.
+    glGenerateMipmap(GL_TEXTURE_2D);
+
 }

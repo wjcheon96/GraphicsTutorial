@@ -60,13 +60,32 @@ bool Context::Init() {
     glClearColor(0.0f, 0.1f, 0.2f, 0.0f);
 
     //이미지 path를 통해서 이미지를 불러온다.
+    // auto image = Image::Create(512, 512);
+    // image->SetCheckImage(16, 16);
     auto image = Image::Load("./image/container.jpg");
-    if (!image) 
+    if (!image)
         return false;
     SPDLOG_INFO("image: {}x{}, {} channels",
-    image->GetWidth(), image->GetHeight(), image->GetChannelCount());
+        image->GetWidth(), image->GetHeight(), image->GetChannelCount());
 
     m_texture = Texture::CreateFromImage(image.get());
+
+    auto image2 = Image::Load("./image/awesomeface.png");
+    m_texture2 = Texture::CreateFromImage(image2.get());
+
+    // 사용할 슬롯 번호를 알려준다.
+    glActiveTexture(GL_TEXTURE0);
+    // 세팅하려는 텍스처의 타입과, 해당 id를 바인딩한다.
+    glBindTexture(GL_TEXTURE_2D, m_texture->Get());
+    // 슬롯을 1번으로 바꿔준다.
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+
+    m_program->Use();
+    // glGetUniformLocation으로 location 값을 얻어와서, 2번째 인자를 통해 해당 슬롯을 이용하겠다는것을 shader에 알려준다.
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex"), 0);
+    glUniform1i(glGetUniformLocation(m_program->Get(), "tex2"), 1);
+
 
     return true;
 }
