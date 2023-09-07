@@ -21,5 +21,4 @@ class Program {
         uint32_t m_program { 0 };
 };
 
-
 #endif

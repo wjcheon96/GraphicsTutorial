@@ -8,7 +8,6 @@
 #include "VertexLayout.hpp"
 #include "Texture.hpp"
 
-
 CLASS_PTR(Context)
 class Context {
     public:
@@ -25,6 +24,5 @@ class Context {
         TextureUPtr m_texture;
         TextureUPtr m_texture2;
 };
-
 
 #endif
