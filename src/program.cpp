@@ -38,3 +38,16 @@ Program::~Program() {
 void Program::Use() const {
     glUseProgram(m_program);
 }
+
+// 함수 오버로딩. uniform location만 받으면 int 값을 세팅하고, matrix 값을 밭으면 아래 함수를 통해서 세팅한다.
+
+void Program::SetUniform(const std::string& name, int value) const {
+    auto loc = glGetUniformLocation(m_program, name.c_str());
+    glUniform1i(loc, value);
+}
+
+void Program::SetUniform(const std::string& name, const glm::mat4& value) const {
+    auto loc = glGetUniformLocation(m_program, name.c_str());
+    // matrix 값 세팅하는데 필요한 함수로, location, 몇개가 들어가는지, transpose여부, transform class가 저장하고 있는 floating point의 가장 첫번째 주소의 주소값을 리턴한다.
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
+}

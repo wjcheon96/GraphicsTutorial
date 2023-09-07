@@ -83,3 +83,22 @@ ExternalProject_Add(
 )
 set(DEP_LIST ${DEP_LIST} dep_stb)
 
+# glm
+ExternalProject_Add(
+    dep_glm
+    GIT_REPOSITORY "https://github.com/g-truc/glm"
+    GIT_TAG "0.9.9.8"
+    GIT_SHALLOW 1
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    TEST_COMMAND ""
+    # 위의 stb library를 추가한 방식과 동일하게 가져오나, copy_directory를 통해 디렉토리 자체를 복사해온다.
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${PROJECT_BINARY_DIR}/dep_glm-prefix/src/dep_glm/glm
+        ${DEP_INSTALL_DIR}/include/glm
+)
+
+set(DEP_LIST ${DEP_LIST} dep_glm)
+

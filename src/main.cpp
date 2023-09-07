@@ -1,4 +1,4 @@
-#include "context.hpp"
+#include "Context.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>

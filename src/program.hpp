@@ -14,6 +14,11 @@ class Program {
         ~Program();
         uint32_t Get() const { return m_program; }
         void Use() const;
+
+        // uniform 값을 설정하는 메소드
+        void SetUniform(const std::string& name, int value) const;
+        void SetUniform(const std::string& name, const glm::mat4& value) const;
+
     private:
         Program() {}
         // 초기화를 하는데 쓰일 link 함수.
