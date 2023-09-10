@@ -1,4 +1,5 @@
 #include "Context.hpp"
+#include "GLFW/glfw3.h"
 #include "Image.hpp"
 
 // 이전의 program이랑 shader와 거의 흡사한 구조. context를 생성한다.
@@ -146,6 +147,8 @@ bool Context::Init() {
 }
 
 void Context::Render() {
+
+    // 여러개의 큐브를 그리기 위해 벡터를 여러개를 생성함.
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f, 0.0f, 0.0f),
         glm::vec3( 2.0f, 5.0f, -15.0f),
@@ -159,42 +162,51 @@ void Context::Render() {
         glm::vec3(-1.3f, 1.0f, -1.5f),
     };
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-
-    auto projection = glm::perspective(glm::radians(45.0f),
-        (float)640 / (float)480, 0.01f, 20.0f);
-    auto view = glm::translate(glm::mat4(1.0f),
-        glm::vec3(0.0f, 0.0f, -3.0f));
-
-    for (size_t i = 0; i < cubePositions.size(); i++){
-        auto& pos = cubePositions[i];
-        auto model = glm::translate(glm::mat4(1.0f), pos);
-        model = glm::rotate(model,
-            glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i),
-            glm::vec3(1.0f, 0.5f, 0.0f));
-        auto transform = projection * view * model;
-        m_program->SetUniform("transform", transform);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    }
-}
-
-/*
-void Context::Render() {
     // 실제 framebuffer를 clear함.
     // depth초기화
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     // depth test를 켜서, z 버퍼상 뒤에 있는 그림(1에 가까운쪽)을 안 그리게끔 한다.
     glEnable(GL_DEPTH_TEST);
 
-    m_program->Use();
-    auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 10.0f);
-    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-    auto model = glm::rotate(glm::mat4(1.0f), glm::radians((float)glfwGetTime() * 120.0f), glm::vec3(1.0f, 0.5f, 0.0f));
-    auto transform = projection * view * model;
-    m_program->SetUniform("transform", transform);
+    // m_program->Use();
+    // zNear, zFar 파라미터가 어느 지점까지 보이는지를 확인 가능하게 한다.
+    auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 100.0f);
+
+    // float angle = glfwGetTime() * glm::pi<float>() * 0.5f;
+    // auto x = sinf(angle) * 10.0f;
+    // auto z = cosf(angle) * 10.0f;
+    // auto cameraPos = glm::vec3(x, 0.0f, z);
+    // auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    // auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    // auto view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+
+    auto cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    // auto view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+    auto view = glm::lookAt(
+      m_cameraPos,
+      m_cameraPos + m_cameraFront,
+      m_cameraUp);
+
+    // auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    // auto model = glm::rotate(glm::mat4(1.0f), glm::radians((float)glfwGetTime() * 120.0f), glm::vec3(1.0f, 0.5f, 0.0f));
+    // auto transform = projection * view * model;
+    // m_program->SetUniform("transform", transform);
     // 총 36개의 지점을 가지므로 36개가 필요
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    for (size_t i = 0; i < cubePositions.size(); i++){
+        auto& pos = cubePositions[i];
+        auto model = glm::translate(glm::mat4(1.0f), pos);
+        //모델 회전을 위한 부분
+        model = glm::rotate(model, glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i),
+            glm::vec3(0.0f, 3.0f, 0.0f));
+        auto transform = projection * view * model;
+        m_program->SetUniform("transform", transform);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    }
+    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
     // // static으로 선언했기에, 매 프레임마다 반복적으로 실행될때마다 값이 증가하게 된다.
     // static float time = 0.0f;
@@ -212,4 +224,23 @@ void Context::Render() {
 
     // time += 0.016f;
 }
-*/
+
+void Context::ProcessInput(GLFWwindow* window) {
+    const float cameraSpeed = 0.05f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * m_cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * m_cameraFront;
+
+    auto cameraRight = glm::normalize(glm::cross(m_cameraUp, -m_cameraFront));
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * cameraRight;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * cameraRight;
+
+    auto cameraUp = glm::normalize(glm::cross(-m_cameraFront, cameraRight));
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * cameraUp;
+}

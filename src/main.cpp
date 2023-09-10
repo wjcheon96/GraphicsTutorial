@@ -89,6 +89,7 @@ int main(int ac, char **av) {
     while (!glfwWindowShouldClose(window)) {
         // 아래 루프문에서 event가 발생시 해당 event를 수집함.
         glfwPollEvents();
+        context->ProcessInput(window);
         context->Render();
         /*
             Framebuffer swap은 화면에 그림을 그리는 과정으로,
