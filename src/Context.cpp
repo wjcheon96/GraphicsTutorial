@@ -232,13 +232,13 @@ void Context::ProcessInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         m_cameraPos -= cameraSpeed * m_cameraFront;
 
-    auto cameraRight = glm::normalize(glm::cross(m_cameraUp, -m_cameraFront));
+    auto cameraLeft = glm::normalize(glm::cross(m_cameraUp, m_cameraFront));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        m_cameraPos += cameraSpeed * cameraRight;
+        m_cameraPos -= cameraSpeed * cameraLeft;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        m_cameraPos -= cameraSpeed * cameraRight;
+        m_cameraPos += cameraSpeed * cameraLeft;
 
-    auto cameraUp = glm::normalize(glm::cross(-m_cameraFront, cameraRight));
+    auto cameraUp = glm::normalize(glm::cross(m_cameraFront, cameraLeft));
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         m_cameraPos += cameraSpeed * cameraUp;
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
