@@ -14,6 +14,7 @@ set(WINDOW_HEIGHT 640)
 
 # Mac에서 돌릴때 필요한 추가적인 Flag들.
 if (APPLE)
+    set(MACOS_MM_FILE src/GetScaleFactor.mm)
     set(CMAKE_CXX_FLAGS "-framework Cocoa -framework IOKit -framework OpenGL")
 endif()
 
@@ -30,6 +31,7 @@ add_executable(${PROJECT_NAME}
     src/VertexLayout.cpp src/VertexLayout.hpp
     src/Image.cpp src/Image.hpp
     src/Texture.cpp src/Texture.hpp
+    ${MACOS_MM_FILE}
 )
 
 # ExternalProject 관련 명령어 셋 추가
