@@ -13,7 +13,9 @@
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
     // glViewport를 통해 opengl이 그릴 영역을 지정해줌.
-    glViewport(0, 0, width, height);
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    context->Reshape(width, height);
+    // glViewport(0, 0, width, height);
 }
 
 void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -85,6 +87,13 @@ int main(int ac, char **av) {
         glfwTerminate();
         return -1;
     }
+
+    glfwSetWindowUserPointer(window, context.get());
+
+    OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
+    glfwSetKeyCallback(window, OnKeyEvent);
+
 
     while (!glfwWindowShouldClose(window)) {
         // 아래 루프문에서 event가 발생시 해당 event를 수집함.

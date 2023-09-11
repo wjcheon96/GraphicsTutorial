@@ -132,16 +132,16 @@ bool Context::Init() {
 	m_program->SetUniform("tex", 0);
     m_program->SetUniform("tex2", 1);
 
-    // x축으로 55도만큼 회전시킨다.
-    auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    // 카메라는 원점으로부터 z축 방향으로 -3만큼 떨어짐
-    auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-    // 종횡비 4:3, 세로화각 45도의 원근 투영
-    auto projection = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 0.01f, 10.0f);
-    auto transform = projection * view * model;
-    auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");
+    // // x축으로 55도만큼 회전시킨다.
+    // auto model = glm::rotate(glm::mat4(1.0f), glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    // // 카메라는 원점으로부터 z축 방향으로 -3만큼 떨어짐
+    // auto view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    // // 종횡비 4:3, 세로화각 45도의 원근 투영
+    // auto projection = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 0.01f, 10.0f);
+    // auto transform = projection * view * model;
+    // auto transformLoc = glGetUniformLocation(m_program->Get(), "transform");
 
-    m_program->SetUniform("transform", transform);
+    // m_program->SetUniform("transform", transform);
 
     return true;
 }
@@ -170,7 +170,9 @@ void Context::Render() {
 
     // m_program->Use();
     // zNear, zFar 파라미터가 어느 지점까지 보이는지를 확인 가능하게 한다.
-    auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 100.0f);
+    auto projection = glm::perspective(glm::radians(45.0f),(float)m_width / (float)m_height, 0.01f, 50.0f);
+
+    // auto projection = glm::perspective(glm::radians(45.0f), (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 0.01f, 100.0f);
 
     // float angle = glfwGetTime() * glm::pi<float>() * 0.5f;
     // auto x = sinf(angle) * 10.0f;
@@ -225,8 +227,9 @@ void Context::Render() {
     // time += 0.016f;
 }
 
+// 키 입력에 따라 앞 뒤 상 하 좌 우 에 대해 이동을 하게끔 한다.
 void Context::ProcessInput(GLFWwindow* window) {
-    const float cameraSpeed = 0.05f;
+    const float cameraSpeed = 0.005f;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         m_cameraPos += cameraSpeed * m_cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -243,4 +246,11 @@ void Context::ProcessInput(GLFWwindow* window) {
         m_cameraPos += cameraSpeed * cameraUp;
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         m_cameraPos -= cameraSpeed * cameraUp;
+}
+
+// 창 크기 변경시 해당 함수가 호출되며, resizing을 진행한다.
+void Context::Reshape(int width, int height) {
+    m_width = width;
+    m_height = height;
+    glViewport(0, 0, m_width, m_height);
 }

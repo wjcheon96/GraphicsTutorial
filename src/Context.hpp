@@ -15,6 +15,7 @@ class Context {
         static ContextUPtr Create();
         void Render();
         void ProcessInput(GLFWwindow* window);
+        void Reshape(int width, int height);
     private:
         Context() {}
         bool Init();
@@ -31,6 +32,8 @@ class Context {
         glm::vec3 m_cameraFront { glm::vec3(0.0f, 0.0f, -1.0f) };
         // 카메라가 특정 지점을 바라보게 하는 법.
         glm::vec3 m_cameraUp { glm::vec3(0.0f, 1.0f, 0.0f) };
+        int m_width { WINDOW_WIDTH };
+        int m_height { WINDOW_HEIGHT };
 };
 
 #endif
