@@ -13,7 +13,7 @@
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
     // glViewport를 통해 opengl이 그릴 영역을 지정해줌.
-    auto context = (Context*)glfwGetWindowUserPointer(window);
+    auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
     context->Reshape(width, height);
     // glViewport(0, 0, width, height);
 }
@@ -60,12 +60,6 @@ int main(int ac, char **av) {
     // 따라서 glfwCreateWindow에서 생성된 openGL context를 사용하게끔 명시적으로 넣어줘야 한다.
     glfwMakeContextCurrent(window);
 
-    // glfw로 생성된 윈도우에 특정 이벤트 발생시 실행되는 콜백함수 지정.
-    // 아래와 같이 glfwXXXCallback의 형태를 가짐.
-    // window와 콜백 함수를 매개변수로 집어넣는다.
-    glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
-    glfwSetKeyCallback(window, OnKeyEvent);
-
     // context 생성 이후에 glad 라이브러리를 통해 openGL함수를 로딩한다.
     // process address를 얻어오는 함수를 통해, gl 함수를 로딩함.
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -91,6 +85,9 @@ int main(int ac, char **av) {
     glfwSetWindowUserPointer(window, context.get());
 
     OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    // glfw로 생성된 윈도우에 특정 이벤트 발생시 실행되는 콜백함수 지정.
+    // 아래와 같이 glfwXXXCallback의 형태를 가짐.
+    // window와 콜백 함수를 매개변수로 집어넣는다.
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
 
