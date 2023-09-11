@@ -18,6 +18,19 @@ void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     // glViewport(0, 0, width, height);
 }
 
+//window 내의 커서 position을 계산하는 함수.
+void OnCursorPos(GLFWwindow* window, double x, double y) {
+  auto context = (Context*)glfwGetWindowUserPointer(window);
+  context->MouseMove(x, y);
+}
+
+void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
+  auto context = (Context*)glfwGetWindowUserPointer(window);
+  double x, y;
+  glfwGetCursorPos(window, &x, &y);
+  context->MouseButton(button, action, x, y);
+}
+
 void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
     SPDLOG_INFO("key:{}, scancode: {}, action: {}, mods: {}{}{}",
         key, scancode,
@@ -90,6 +103,8 @@ int main(int ac, char **av) {
     // window와 콜백 함수를 매개변수로 집어넣는다.
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+    glfwSetCursorPosCallback(window, OnCursorPos);
+    glfwSetMouseButtonCallback(window, OnMouseButton);
 
 
     while (!glfwWindowShouldClose(window)) {
