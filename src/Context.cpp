@@ -1,6 +1,7 @@
 #include "Context.hpp"
 #include "GLFW/glfw3.h"
 #include "Image.hpp"
+#include <iostream>
 
 // 이전의 program이랑 shader와 거의 흡사한 구조. context를 생성한다.
 ContextUPtr Context::Create() {
@@ -132,6 +133,7 @@ void Context::Render() {
     // depth test를 켜서, z 버퍼상 뒤에 있는 그림(1에 가까운쪽)을 안 그리게끔 한다.
     glEnable(GL_DEPTH_TEST);
 
+    // m_cameraFront를 yaw/pitch에 따라 방향 결정.(0, 0, -1)방향을 x축, y축에 따라 회전시킨다.
     m_cameraFront = glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraYaw), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f),
         glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
@@ -166,7 +168,7 @@ void Context::Render() {
 void Context::ProcessInput(GLFWwindow* window) {
     if (!m_cameraControl)
         return;
-    const float cameraSpeed = 0.005f;
+    const float cameraSpeed = 0.05f;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         m_cameraPos += cameraSpeed * m_cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -189,6 +191,7 @@ void Context::ProcessInput(GLFWwindow* window) {
 void Context::Reshape(int width, int height) {
     m_width = width;
     m_height = height;
+    std::cout << m_width << " " << m_height << std::endl;
     glViewport(0, 0, m_width, m_height);
 }
 
@@ -201,17 +204,18 @@ void Context::MouseMove(double x, double y) {
     static glm::vec2 prevPos = glm::vec2((float)x, (float)y);
 
     const float cameraRotSpeed = 0.8f;
+    // yaw와 pitch를 계산한다. rotspeed를 조절하여 너무 빠른 전환이 안 일어나게끔 한다.
     m_cameraYaw -= deltaPos.x * cameraRotSpeed;
     m_cameraPitch -= deltaPos.y * cameraRotSpeed;
 
+    // 사이즈가 각도를 초과하면 0 ~ 360 사이의 값으로 다시 바꿔줌.
     if (m_cameraYaw < 0.0f)   m_cameraYaw += 360.0f;
     if (m_cameraYaw > 360.0f) m_cameraYaw -= 360.0f;
 
     if (m_cameraPitch > 89.0f)  m_cameraPitch = 89.0f;
     if (m_cameraPitch < -89.0f) m_cameraPitch = -89.0f;
 
-    m_prevMousePos = pos;    
-
+    m_prevMousePos = pos;
 }
 
 void Context::MouseButton(int button, int action, double x, double y) {

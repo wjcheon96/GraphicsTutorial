@@ -37,8 +37,12 @@ class Context {
         glm::vec3 m_cameraUp { glm::vec3(0.0f, 1.0f, 0.0f) };
         int m_width { WINDOW_WIDTH };
         int m_height { WINDOW_HEIGHT };
+    
+        // camera parameter.
+        // pitch 와 yaw에 대한 값 세팅.
         float m_cameraPitch { 0.0f };
         float m_cameraYaw { 0.0f };
+        
         bool m_cameraControl { false };
         glm::vec2 m_prevMousePos { glm::vec2(0.0f) };
 

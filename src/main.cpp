@@ -60,7 +60,6 @@ int main(int ac, char **av) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-
     std::cout << "Create glfw window" << std::endl;
     // glfwCreateWindow를 호출 시 window가 생성되며, 동시에 window에서 사용되는 openGL context가 만들어진다.
     auto window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, nullptr, nullptr);
@@ -94,10 +93,15 @@ int main(int ac, char **av) {
         glfwTerminate();
         return -1;
     }
-
     glfwSetWindowUserPointer(window, context.get());
 
-    OnFramebufferSizeChange(window, WINDOW_WIDTH, WINDOW_HEIGHT);
+    // resizing시, mac 의 경우 픽셀을 1단위픽셀을 2배로 잡기에 생기는 문제를 해결하기 위함.
+    #ifdef __APPLE__
+        OnFramebufferSizeChange(window, WINDOW_WIDTH * 2, WINDOW_HEIGHT * 2);
+    #else
+        OnFramebufferSizeChange(window, WINDOW_WIDTH * 2, WINDOW_HEIGHT);
+    #endif
+
     // glfw로 생성된 윈도우에 특정 이벤트 발생시 실행되는 콜백함수 지정.
     // 아래와 같이 glfwXXXCallback의 형태를 가짐.
     // window와 콜백 함수를 매개변수로 집어넣는다.
