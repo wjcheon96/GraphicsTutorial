@@ -8,7 +8,7 @@
 // #include <glad/glad.h>
 // #include <GLFW/glfw3.h>
 
-#ifdef __APPLE
+#ifdef __APPLE__
     extern "C" {
         float getScaleFactor(); // Objective-C++에서 정의한 함수를 선언
     }
@@ -51,7 +51,7 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
 }
 
 int main(int ac, char **av) {
-    #ifdef __APPLE
+    #ifdef __APPLE__
         float scaleFactor = getScaleFactor();
     #else
         float scaleFactor = 1.0f;
