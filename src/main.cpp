@@ -8,9 +8,11 @@
 // #include <glad/glad.h>
 // #include <GLFW/glfw3.h>
 
-extern "C" {
-    float getScaleFactor(); // Objective-C++에서 정의한 함수를 선언
-}
+#ifdef __APPLE
+    extern "C" {
+        float getScaleFactor(); // Objective-C++에서 정의한 함수를 선언
+    }
+#endif
 
 // window의 크기가 바꼈을때 해야할 작업 수행.
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
@@ -49,7 +51,12 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
 }
 
 int main(int ac, char **av) {
-    float scaleFactor = getScaleFactor();
+    #ifdef __APPLE
+        float scaleFactor = getScaleFactor();
+    #else
+        float scaleFactor = 1.0f;
+    #endif
+
     std::cout << "Initialize glfw" << std::endl;
     if (!glfwInit()) {
         const char* description = NULL;
