@@ -112,7 +112,29 @@ bool Context::Init() {
 }
 
 void Context::Render() {
-
+    // window가 접혀있으면 해당 코드가 실행되지 않는다.
+    if (ImGui::Begin("UI Window")) {
+        // 색 변환 함수. 각각의 파라미터는 label name, 그 뒤의 인자는 color를 집어넣는다.
+        // color 값이 바뀌면 해당 로직이 실행된다.
+        if (ImGui::ColorEdit4("clear color", glm::value_ptr(m_clearColor))) {
+            glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, m_clearColor.a);
+        }
+        // 중간 구분선 추가.
+        ImGui::Separator();
+        // drag를 통해 카메라를 움직이게끔 할 수 있다.
+        // 각각 pos, yaw, pitch 정보를 담아 드래그 시 값이 변경되면 그 값이 적용된다.
+        ImGui::DragFloat3("camera pos", glm::value_ptr(m_cameraPos), 0.01f);
+        ImGui::DragFloat("camera yaw", &m_cameraYaw, 0.5f);
+        ImGui::DragFloat("camera pitch", &m_cameraPitch, 0.5f, -89.0f, 89.0f);
+        ImGui::Separator();
+        // reset 버튼이 눌리면 yaw, pitch, camera pos의 값을 초기화 해서 리셋시킨다.
+        if (ImGui::Button("reset camera")) {
+            m_cameraYaw = 0.0f;
+            m_cameraPitch = 0.0f;
+            m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        }
+    }
+    ImGui::End();
     // 여러개의 큐브를 그리기 위해 벡터를 여러개를 생성함.
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f, 0.0f, 0.0f),
@@ -162,10 +184,6 @@ void Context::Render() {
         m_program->SetUniform("transform", transform);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
-    if (ImGui::Begin("my first ImGui window")) {
-        ImGui::Text("This is first text...");
-    }
-    ImGui::End();
 }
 
 // 키 입력에 따라 앞 뒤 상 하 좌 우 에 대해 이동을 하게끔 한다.
@@ -173,10 +191,6 @@ void Context::ProcessInput(GLFWwindow* window) {
     if (!m_cameraControl)
         return;
     const float cameraSpeed = 0.05f;
-    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    //     m_cameraPos += cameraSpeed * m_cameraFront;
-    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    //     m_cameraPos -= cameraSpeed * m_cameraFront;
 
     auto cameraLeft = glm::normalize(glm::cross(m_cameraUp, m_cameraFront));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -232,11 +246,10 @@ void Context::MouseButton(int button, int action, double x, double y) {
             m_cameraControl = false;
         }
     }
-
 }
 
 void Context::MouseScroll(double yoffset) {
-    float cameraSpeed = 0.15f;
+    const float cameraSpeed = 0.15f;
     if (yoffset < 0) {
         m_cameraPos += cameraSpeed * m_cameraFront;
     }

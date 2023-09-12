@@ -3,6 +3,7 @@
 #include "spdlog/spdlog.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_impl_opengl3_loader.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -33,7 +34,8 @@ void OnCursorPos(GLFWwindow* window, double x, double y) {
 }
 
 void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
+    // ImGui::IsMouseHoveringAnyWindow 함수에 대한 확인 필요.
+    // ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
     auto context = (Context*)glfwGetWindowUserPointer(window);
     double x, y;
     glfwGetCursorPos(window, &x, &y);
@@ -41,6 +43,7 @@ void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
 }
 
 void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
     SPDLOG_INFO("key:{}, scancode: {}, action: {}, mods: {}{}{}",
         key, scancode,
         action == GLFW_PRESS ? "Pressed":
@@ -54,9 +57,14 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     }
 }
 
+void OnCharEvent(GLFWwindow* window, unsigned int ch) {
+    ImGui_ImplGlfw_CharCallback(window, ch);
+}
+
 void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    auto context = (Context *)glfwGetWindowUserPointer(window);
-    context->MouseScroll(yoffset);    
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    // auto context = (Context *)glfwGetWindowUserPointer(window);
+    // context->MouseScroll(yoffset);    
 }
 
 int main(int ac, char **av) {
@@ -135,6 +143,7 @@ int main(int ac, char **av) {
     // window와 콜백 함수를 매개변수로 집어넣는다.
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+    glfwSetCharCallback(window, OnCharEvent);
     glfwSetScrollCallback(window, OnScrollCallback);
     glfwSetCursorPosCallback(window, OnCursorPos);
     glfwSetMouseButtonCallback(window, OnMouseButton);

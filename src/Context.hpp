@@ -38,6 +38,8 @@ class Context {
         glm::vec3 m_cameraUp { glm::vec3(0.0f, 1.0f, 0.0f) };
         int m_width { WINDOW_WIDTH };
         int m_height { WINDOW_HEIGHT };
+
+        glm::vec4 m_clearColor { glm::vec4(0.3f, 0.2f, 0.1f, 0.0f) };
     
         // camera parameter.
         // pitch 와 yaw에 대한 값 세팅.
