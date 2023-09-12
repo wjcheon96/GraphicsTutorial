@@ -1,4 +1,8 @@
 #include "Context.hpp"
+#include "imgui.h"
+#include "spdlog/spdlog.h"
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -20,20 +24,20 @@ void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     // glViewport를 통해 opengl이 그릴 영역을 지정해줌.
     auto context = reinterpret_cast<Context*>(glfwGetWindowUserPointer(window));
     context->Reshape(width, height);
-    // glViewport(0, 0, width, height);
 }
 
 //window 내의 커서 position을 계산하는 함수.
 void OnCursorPos(GLFWwindow* window, double x, double y) {
-  auto context = (Context*)glfwGetWindowUserPointer(window);
-  context->MouseMove(x, y);
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    context->MouseMove(x, y);
 }
 
 void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
-  auto context = (Context*)glfwGetWindowUserPointer(window);
-  double x, y;
-  glfwGetCursorPos(window, &x, &y);
-  context->MouseButton(button, action, x, y);
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
+    auto context = (Context*)glfwGetWindowUserPointer(window);
+    double x, y;
+    glfwGetCursorPos(window, &x, &y);
+    context->MouseButton(button, action, x, y);
 }
 
 void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -50,6 +54,11 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     }
 }
 
+void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+    auto context = (Context *)glfwGetWindowUserPointer(window);
+    context->MouseScroll(yoffset);    
+}
+
 int main(int ac, char **av) {
     #ifdef __APPLE__
         float scaleFactor = getScaleFactor();
@@ -57,11 +66,11 @@ int main(int ac, char **av) {
         float scaleFactor = 1.0f;
     #endif
 
-    std::cout << "Initialize glfw" << std::endl;
+    SPDLOG_INFO("Initialize glfw");
     if (!glfwInit()) {
         const char* description = NULL;
         glfwGetError(&description);
-        std::cout << "Failed to initialize glfw: " << description << std::endl;
+        SPDLOG_ERROR("Failed to initialize glfw: {}", description);
         return -1;
     }
 
@@ -71,11 +80,11 @@ int main(int ac, char **av) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    std::cout << "Create glfw window" << std::endl;
+    SPDLOG_INFO("Create glfw window");
     // glfwCreateWindow를 호출 시 window가 생성되며, 동시에 window에서 사용되는 openGL context가 만들어진다.
     auto window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, nullptr, nullptr);
     if (!window) {
-        std::cout << "failed to create glfw window" << std::endl;
+        SPDLOG_ERROR("Failed to create glfw window");
         glfwTerminate();
         return -1;
     }
@@ -86,15 +95,27 @@ int main(int ac, char **av) {
     // context 생성 이후에 glad 라이브러리를 통해 openGL함수를 로딩한다.
     // process address를 얻어오는 함수를 통해, gl 함수를 로딩함.
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "failed to initialize glad" << std::endl;
+        SPDLOG_ERROR("Failed to initialize glad");
         glfwTerminate();
         return -1;
-    } 
+    }
 
     // 정상적으로 gl함수가 잘 불려왔는지를 확인한다.
     // opengl function 중에서 가장 기본적인 정보를 가져오는 glGetString을 통해 확인해본다.
     auto glVersion = glGetString(GL_VERSION);
-    std::cout << "OpenGl context version: " << glVersion << std::endl;
+    SPDLOG_INFO("OpenGL context version: {}", (char *)glVersion);
+
+    // imgui의 context를 생성한다.
+    auto imguiContext = ImGui::CreateContext();
+    // 위에서 생성한 imgui context를 현재 context로 세팅을 한다.
+    ImGui::SetCurrentContext(imguiContext);
+    // imple_glfw 내부의 initForOpenGl 함수를 호출하는데, window를 잡고, 콜백에 대한 세팅을 직접 진행하기에, 자동으로 콜백하는 것을 막아준다.
+    ImGui_ImplGlfw_InitForOpenGL(window, false);
+    // opengl3.3 version의 렌더러를 초기화한다. 
+    ImGui_ImplOpenGL3_Init();
+    // imgui가 사용하고자 하는 font나 object(쉐이더프로그램, 텍스처 등)를 초기화를 진행한다.
+    ImGui_ImplOpenGL3_CreateFontsTexture();
+    ImGui_ImplOpenGL3_CreateDeviceObjects();
 
     // shader와 program을 context 객체를 통해서 관리.
     // unique_ptr의 reset 함수를 통해 메모리 관리를 용이하게 함.
@@ -114,14 +135,28 @@ int main(int ac, char **av) {
     // window와 콜백 함수를 매개변수로 집어넣는다.
     glfwSetFramebufferSizeCallback(window, OnFramebufferSizeChange);
     glfwSetKeyCallback(window, OnKeyEvent);
+    glfwSetScrollCallback(window, OnScrollCallback);
     glfwSetCursorPosCallback(window, OnCursorPos);
     glfwSetMouseButtonCallback(window, OnMouseButton);
 
     while (!glfwWindowShouldClose(window)) {
         // 아래 루프문에서 event가 발생시 해당 event를 수집함.
         glfwPollEvents();
+
+        // ImGui가 매 프레임마다 새롭게 계산된다.
+        ImGui_ImplGlfw_NewFrame();
+        // 해당 새 프레임의 생성을 명시적으로 알려준다.
+        ImGui::NewFrame();
+        
         context->ProcessInput(window);
         context->Render();
+
+        // 실제 렌더 위에 그린다. 
+        // Render() 함수는 실제로 그리진 않고, 이후에 렌더를 할 리스트를 종합하는 함수이다.
+        ImGui::Render();
+        // 실제 opengl3 function을 이용해서 그리는 함수. GetDrawData()에서 실제로 그린다.
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         /*
             Framebuffer swap은 화면에 그림을 그리는 과정으로,
             프레임 버퍼를 2개를 준비하여(front / back)
@@ -134,6 +169,13 @@ int main(int ac, char **av) {
     }
     // std::unique_ptr의 reset() 함수를 통해 메모리를 정리.
     context.reset();
+
+    // 종료 전에 ImGUI 관련 스택을 없애준다.
+    ImGui_ImplOpenGL3_DestroyFontsTexture();
+    ImGui_ImplOpenGL3_DestroyDeviceObjects();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext(imguiContext);
 
     glfwTerminate();
     return 0;

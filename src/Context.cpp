@@ -1,7 +1,7 @@
 #include "Context.hpp"
 #include "GLFW/glfw3.h"
 #include "Image.hpp"
-#include <iostream>
+#include <imgui.h>
 
 // 이전의 program이랑 shader와 거의 흡사한 구조. context를 생성한다.
 ContextUPtr Context::Create() {
@@ -162,6 +162,10 @@ void Context::Render() {
         m_program->SetUniform("transform", transform);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
+    if (ImGui::Begin("my first ImGui window")) {
+        ImGui::Text("This is first text...");
+    }
+    ImGui::End();
 }
 
 // 키 입력에 따라 앞 뒤 상 하 좌 우 에 대해 이동을 하게끔 한다.
@@ -169,10 +173,10 @@ void Context::ProcessInput(GLFWwindow* window) {
     if (!m_cameraControl)
         return;
     const float cameraSpeed = 0.05f;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        m_cameraPos += cameraSpeed * m_cameraFront;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        m_cameraPos -= cameraSpeed * m_cameraFront;
+    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    //     m_cameraPos += cameraSpeed * m_cameraFront;
+    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    //     m_cameraPos -= cameraSpeed * m_cameraFront;
 
     auto cameraLeft = glm::normalize(glm::cross(m_cameraUp, m_cameraFront));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -191,7 +195,6 @@ void Context::ProcessInput(GLFWwindow* window) {
 void Context::Reshape(int width, int height) {
     m_width = width;
     m_height = height;
-    std::cout << m_width << " " << m_height << std::endl;
     glViewport(0, 0, m_width, m_height);
 }
 
@@ -219,14 +222,25 @@ void Context::MouseMove(double x, double y) {
 }
 
 void Context::MouseButton(int button, int action, double x, double y) {
-  if (button == GLFW_MOUSE_BUTTON_LEFT) {
-    if (action == GLFW_PRESS) {
-      // 마우스 조작 시작 시점에 현재 마우스 커서 위치 저장
-      m_prevMousePos = glm::vec2((float)x, (float)y);
-      m_cameraControl = true;
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+        if (action == GLFW_PRESS) {
+        // 마우스 조작 시작 시점에 현재 마우스 커서 위치 저장
+            m_prevMousePos = glm::vec2((float)x, (float)y);
+            m_cameraControl = true;
+        }
+        else if (action == GLFW_RELEASE) {
+            m_cameraControl = false;
+        }
     }
-    else if (action == GLFW_RELEASE) {
-      m_cameraControl = false;
+
+}
+
+void Context::MouseScroll(double yoffset) {
+    float cameraSpeed = 0.15f;
+    if (yoffset < 0) {
+        m_cameraPos += cameraSpeed * m_cameraFront;
     }
-  }
+    else if (yoffset > 0) {
+        m_cameraPos -= cameraSpeed * m_cameraFront;
+    }
 }
