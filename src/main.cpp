@@ -3,12 +3,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#ifdef __APPLE__
-    extern "C" {
-        float getScaleFactor(); // Objective-C++에서 정의한 함수를 선언
-    }
-#endif
-
 // window의 크기가 바꼈을때 해야할 작업 수행.
 void OnFramebufferSizeChange(GLFWwindow* window, int width, int height) {
     SPDLOG_INFO("framebuffer size changed: ({} x {})", width, height);
@@ -57,12 +51,6 @@ void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 }
 
 int main(int ac, char **av) {
-    #ifdef __APPLE__
-        float scaleFactor = getScaleFactor();
-    #else
-        float scaleFactor = 1.0f;
-    #endif
-
     SPDLOG_INFO("Initialize glfw");
     if (!glfwInit()) {
         const char* description = NULL;
@@ -124,8 +112,6 @@ int main(int ac, char **av) {
     }
     // resizing시, mac 의 경우 픽셀을 1단위픽셀을 2배로 잡기에 생기는 문제를 해결하기 위함.
     glfwSetWindowUserPointer(window, context.get());
-    SPDLOG_INFO("scale factor: {}", scaleFactor);
-    OnFramebufferSizeChange(window, WINDOW_WIDTH * scaleFactor, WINDOW_HEIGHT * scaleFactor);
 
     // glfw로 생성된 윈도우에 특정 이벤트 발생시 실행되는 콜백함수 지정.
     // 아래와 같이 glfwXXXCallback의 형태를 가짐.
