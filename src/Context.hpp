@@ -2,7 +2,6 @@
 #define __CONTEXT_HPP__
 
 #include "Common.hpp"
-#include <GLFW/glfw3.h>
 #include "Shader.hpp"
 #include "Program.hpp"
 #include "Buffer.hpp"

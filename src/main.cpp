@@ -1,17 +1,8 @@
+#include "Common.hpp"
 #include "Context.hpp"
-#include "imgui.h"
-#include "spdlog/spdlog.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <imgui_impl_opengl3_loader.h>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
 
-// #include <spdlog/spdlog.h>
-// // glad는 반드시 glfw 이전에 헤더 명시를 해주어야한다.
-// #include <glad/glad.h>
-// #include <GLFW/glfw3.h>
 
 #ifdef __APPLE__
     extern "C" {
@@ -62,9 +53,9 @@ void OnCharEvent(GLFWwindow* window, unsigned int ch) {
 }
 
 void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
-    // auto context = (Context *)glfwGetWindowUserPointer(window);
-    // context->MouseScroll(yoffset);    
+    // ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    auto context = (Context *)glfwGetWindowUserPointer(window);
+    context->MouseScroll(yoffset);    
 }
 
 int main(int ac, char **av) {
@@ -83,9 +74,9 @@ int main(int ac, char **av) {
     }
 
     // init 이후 window 생성 전에 만들기 희망하는 OpenGL의 버전을 추가해줌.
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint (GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     SPDLOG_INFO("Create glfw window");
