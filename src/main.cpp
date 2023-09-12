@@ -3,7 +3,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-
 #ifdef __APPLE__
     extern "C" {
         float getScaleFactor(); // Objective-C++에서 정의한 함수를 선언
@@ -25,8 +24,8 @@ void OnCursorPos(GLFWwindow* window, double x, double y) {
 }
 
 void OnMouseButton(GLFWwindow* window, int button, int action, int modifier) {
-    // ImGui::IsMouseHoveringAnyWindow 함수에 대한 확인 필요.
-    // ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
+    // 마우스 버튼이 클릭되었을때, ImGui화면에 버튼 클릭이 값이 들어가게 한다.
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, modifier);
     auto context = (Context*)glfwGetWindowUserPointer(window);
     double x, y;
     glfwGetCursorPos(window, &x, &y);
@@ -48,14 +47,13 @@ void OnKeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods)
     }
 }
 
+// 텍스트 입력에 대한 콜백함수
 void OnCharEvent(GLFWwindow* window, unsigned int ch) {
     ImGui_ImplGlfw_CharCallback(window, ch);
 }
 
 void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
-    // ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
-    auto context = (Context *)glfwGetWindowUserPointer(window);
-    context->MouseScroll(yoffset);    
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 }
 
 int main(int ac, char **av) {

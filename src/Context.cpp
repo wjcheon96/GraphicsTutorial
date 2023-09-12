@@ -186,11 +186,14 @@ void Context::Render() {
     }
 }
 
-// 키 입력에 따라 앞 뒤 상 하 좌 우 에 대해 이동을 하게끔 한다.
+// 키 입력에 따라상 하 좌 우 에 대해 이동을 하게끔 한다.
 void Context::ProcessInput(GLFWwindow* window) {
-    if (!m_cameraControl)
-        return;
+
     const float cameraSpeed = 0.05f;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        m_cameraPos += cameraSpeed * m_cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        m_cameraPos -= cameraSpeed * m_cameraFront;
 
     auto cameraLeft = glm::normalize(glm::cross(m_cameraUp, m_cameraFront));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
@@ -245,15 +248,5 @@ void Context::MouseButton(int button, int action, double x, double y) {
         else if (action == GLFW_RELEASE) {
             m_cameraControl = false;
         }
-    }
-}
-
-void Context::MouseScroll(double yoffset) {
-    const float cameraSpeed = 0.15f;
-    if (yoffset < 0) {
-        m_cameraPos += cameraSpeed * m_cameraFront;
-    }
-    else if (yoffset > 0) {
-        m_cameraPos -= cameraSpeed * m_cameraFront;
     }
 }
