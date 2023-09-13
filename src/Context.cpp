@@ -15,37 +15,38 @@ ContextUPtr Context::Create() {
 bool Context::Init() {
     // 정점 데이터를 담은 array를 선언.
     // openGL화면은 가로 세로가 -1 ~ +1로 normalizing 된 좌표계를 사용한다.
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+float vertices[] = { // pos.xyz, normal.xyz, texcoord.uv
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
 
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
 
-        -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
 
-        0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
 
-        -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
     };
+
 
     uint32_t indices[] = {
         0,  2,  1,  2,  0,  3,
@@ -57,18 +58,19 @@ bool Context::Init() {
     };
 
     m_vertexLayout = VertexLayout::Create();
-    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, 
-        GL_STATIC_DRAW, vertices, sizeof(float) * 120);
+    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW,
+        vertices, sizeof(float) * 8 * 6 * 4);
 
-    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-    m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, sizeof(float) * 3);
+    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
+    m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 3);
+    m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 6);
 
     m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
         GL_STATIC_DRAW, indices, sizeof(uint32_t) * 36);
 
     // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
-    ShaderPtr vertShader = Shader::CreateFromFile("./shader/texture.vs", GL_VERTEX_SHADER);
-    ShaderPtr fragShader = Shader::CreateFromFile("./shader/texture.fs", GL_FRAGMENT_SHADER);
+    ShaderPtr vertShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
+    ShaderPtr fragShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
     if (!vertShader || !fragShader)
         return false;
     SPDLOG_INFO("vertex shader id: {}", vertShader->Get());
@@ -133,8 +135,19 @@ void Context::Render() {
             m_cameraPitch = 0.0f;
             m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
         }
+        ImGui::Separator();
+        if (ImGui::CollapsingHeader("light")) {
+            ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
+            ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
+            ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
+        }
     }
     ImGui::End();
+    m_program->Use();
+    m_program->SetUniform("lightColor", m_lightColor);
+    m_program->SetUniform("objectColor", m_objectColor);
+    m_program->SetUniform("ambientStrength", m_ambientStrength);
+
     // 여러개의 큐브를 그리기 위해 벡터를 여러개를 생성함.
     std::vector<glm::vec3> cubePositions = {
         glm::vec3( 0.0f, 0.0f, 0.0f),

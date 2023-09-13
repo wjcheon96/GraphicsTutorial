@@ -46,6 +46,16 @@ void Program::SetUniform(const std::string& name, int value) const {
     glUniform1i(loc, value);
 }
 
+void Program::SetUniform(const std::string& name, float value) const {
+    auto loc = glGetUniformLocation(m_program, name.c_str());
+    glUniform1f(loc, value);
+}
+
+void Program::SetUniform(const std::string& name, const glm::vec3& value) const {
+    auto loc = glGetUniformLocation(m_program, name.c_str());
+    glUniform3fv(loc, 1, glm::value_ptr(value));
+}
+
 void Program::SetUniform(const std::string& name, const glm::mat4& value) const {
     auto loc = glGetUniformLocation(m_program, name.c_str());
     // matrix 값 세팅하는데 필요한 함수로, location, 몇개가 들어가는지, transpose여부, transform class가 저장하고 있는 floating point의 가장 첫번째 주소의 주소값을 리턴한다.
