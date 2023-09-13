@@ -136,17 +136,15 @@ void Context::Render() {
             m_cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
         }
         ImGui::Separator();
-        if (ImGui::CollapsingHeader("light")) {
+        if (ImGui::CollapsingHeader("light", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::DragFloat3("light pos", glm::value_ptr(m_lightPos), 0.01f);
             ImGui::ColorEdit3("light color", glm::value_ptr(m_lightColor));
             ImGui::ColorEdit3("object color", glm::value_ptr(m_objectColor));
             ImGui::SliderFloat("ambient strength", &m_ambientStrength, 0.0f, 1.0f);
         }
+        ImGui::Checkbox("animation", &m_animation);
     }
     ImGui::End();
-    m_program->Use();
-    m_program->SetUniform("lightColor", m_lightColor);
-    m_program->SetUniform("objectColor", m_objectColor);
-    m_program->SetUniform("ambientStrength", m_ambientStrength);
 
     // 여러개의 큐브를 그리기 위해 벡터를 여러개를 생성함.
     std::vector<glm::vec3> cubePositions = {
@@ -172,10 +170,6 @@ void Context::Render() {
     m_cameraFront = glm::rotate(glm::mat4(1.0f), glm::radians(m_cameraYaw), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f),
         glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
 
-    // zNear, zFar 파라미터가 어느 지점까지 보이는지를 확인 가능하게 한다.
-    // // 종횡비 4:3, 세로화각 45도의 원근 투영
-    auto projection = glm::perspective(glm::radians(45.0f),(float)m_width / (float)m_height, 0.01f, 50.0f);
-
     auto cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
     auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     auto cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -186,15 +180,40 @@ void Context::Render() {
       m_cameraPos + m_cameraFront,
       m_cameraUp);
 
+    // zNear, zFar 파라미터가 어느 지점까지 보이는지를 확인 가능하게 한다.
+    // // 종횡비 4:3, 세로화각 45도의 원근 투영
+    auto projection = glm::perspective(glm::radians(45.0f),(float)m_width / (float)m_height, 0.01f, 50.0f);
+
+    auto lightModelTransform = glm::translate(glm::mat4(1.0), m_lightPos) *
+        glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    m_program->Use();
+    m_program->SetUniform("lightPos", m_lightPos);
+    m_program->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_program->SetUniform("objectColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_program->SetUniform("ambientStrength", 1.0f);
+    m_program->SetUniform("transform", projection * view * lightModelTransform);
+    m_program->SetUniform("modelTransform", lightModelTransform);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    
+    m_program->Use();
+    m_program->SetUniform("lightPos", m_lightPos);
+    m_program->SetUniform("lightColor", m_lightColor);
+    m_program->SetUniform("objectColor", m_objectColor);
+    m_program->SetUniform("ambientStrength", m_ambientStrength);
+
     // 총 36개의 지점을 가지므로 36개가 필요
     for (size_t i = 0; i < cubePositions.size(); i++){
         auto& pos = cubePositions[i];
         auto model = glm::translate(glm::mat4(1.0f), pos);
+        auto angle = glm::radians((m_animation ? (float)glfwGetTime() : 0.0f) * 120.0f + 20.0f * (float)i);
+        model = glm::rotate(model, m_animation ? angle : 0.0f,
+            glm::vec3(1.0f, 0.5f, 0.0f));
         //모델 회전을 위한 부분
-        model = glm::rotate(model, glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i),
-            glm::vec3(0.0f, 3.0f, 0.0f));
+        // model = glm::rotate(model, glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i),
+        //     glm::vec3(0.0f, 3.0f, 0.0f));
         auto transform = projection * view * model;
         m_program->SetUniform("transform", transform);
+        m_program->SetUniform("modelTransform", model);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
 }

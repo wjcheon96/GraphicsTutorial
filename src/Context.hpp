@@ -40,9 +40,11 @@ class Context {
 
         glm::vec4 m_clearColor { glm::vec4(0.3f, 0.2f, 0.1f, 0.0f) };
         
+        glm::vec3 m_lightPos { glm::vec3(3.0f, 3.0f, 3.0f) };
         glm::vec3 m_lightColor { glm::vec3(1.0f, 1.0f, 1.0f) };
         glm::vec3 m_objectColor { glm::vec3(1.0f, 0.5f, 0.0f) };
         float m_ambientStrength { 1.0f };
+        bool m_animation { true };
     
         // camera parameter.
         // pitch 와 yaw에 대한 값 세팅.
