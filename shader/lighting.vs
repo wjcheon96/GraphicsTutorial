@@ -16,7 +16,7 @@ out vec2 texCoord;
 out vec3 position;
  
 void main() {
-    // 모델의 local coordinate을 기준으로 있는 vertex가 화면상에 어디에 있는지를, canonical coordinate
+    // 모델의 local coordinate을 기준으로 있는 vertex가 화면상에 어디에 있는지를, canonical coordinate(-1 ~ +1)
     gl_Position = transform * vec4(aPos, 1.0);
     normal = (transpose(inverse(modelTransform)) * vec4(aNormal, 0.0)).xyz;
     texCoord = aTexCoord;
