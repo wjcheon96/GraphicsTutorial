@@ -37,22 +37,32 @@ class Context {
         glm::vec3 m_cameraUp { glm::vec3(0.0f, 1.0f, 0.0f) };
         int m_width { WINDOW_WIDTH };
         int m_height { WINDOW_HEIGHT };
+        bool m_animation { true };
 
         glm::vec4 m_clearColor { glm::vec4(0.3f, 0.2f, 0.1f, 0.0f) };
         
-        glm::vec3 m_lightPos { glm::vec3(3.0f, 3.0f, 3.0f) };
-        glm::vec3 m_lightColor { glm::vec3(1.0f, 1.0f, 1.0f) };
-        glm::vec3 m_objectColor { glm::vec3(1.0f, 0.5f, 0.0f) };
-        float m_ambientStrength { 1.0f };
-        bool m_animation { true };
+        // light parameter
+        struct Light {
+            glm::vec3 position { glm::vec3(3.0f, 3.0f, 3.0f) };
+            glm::vec3 ambient { glm::vec3(0.1f, 0.1f, 0.1f) };
+            glm::vec3 diffuse { glm::vec3(0.5f, 0.5f, 0.5f) };
+            glm::vec3 specular { glm::vec3(1.0f, 1.0f, 1.0f) };
+        };
+        Light m_light;
+
+        // material parameter
+        struct Material {
+            glm::vec3 ambient { glm::vec3(1.0f, 0.5f, 0.3f) };
+            glm::vec3 diffuse { glm::vec3(1.0f, 0.5f, 0.3f) };
+            glm::vec3 specular { glm::vec3(0.5f, 0.5f, 0.5f) };
+            float shininess { 32.0f };
+        };
+        Material m_material;
     
         // camera parameter.
         // pitch 와 yaw에 대한 값 세팅.
         float m_cameraPitch { 0.0f };
         float m_cameraYaw { 0.0f };
-
-        float m_specularStrength { 0.5f };
-        float m_specularShininess { 32.0f };
         
         bool m_cameraControl { false };
         glm::vec2 m_prevMousePos { glm::vec2(0.0f) };
