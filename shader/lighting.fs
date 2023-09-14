@@ -18,17 +18,19 @@ struct Light {
 uniform Light light;
 
 struct Material {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    // diffuse map을 사용한다.
+    // material의 diffuse color와 ambient color는 통상적으로 동일한 형태로 많이 쓴다.
+    sampler2D diffuse;
+    sampler2D specular;
     // 표면의 반짝거림을 표현하기에 meterial로 들어간다.
     float shininess;
 };
 uniform Material material;
 
 void main() {
+    vec3 texColor = texture(material.diffuse, texCoord).xyz;
     // 주변광 계산
-    vec3 ambient = material.ambient * light.ambient;
+    vec3 ambient = texColor * light.ambient;
 
     // 빛의 방향
     vec3 lightDir = normalize(light.position - position);
@@ -37,8 +39,9 @@ void main() {
     // 빛의 크기를 구하되, pixelNorm과 lightDir의 내적 값을 계산하는데, 이 수치가 음수일때는 0으로 둠.
     // 이후 material과 light의 diffuse와 곱해서 값을 구함.
     float diff = max(dot(pixelNorm, lightDir), 0.0);
-    vec3 diffuse = diff * material.diffuse * light.diffuse;
+    vec3 diffuse = diff * texColor * light.diffuse;
 
+    vec3 specColor = texture(material.specular, texCoord).xyz;
     // light direction을 구한 방식과 동일.
     // 현재 카메라의 world space 상의 좌표와 픽셀 좌표 간의 차를 통해 시선 벡터 viewDir 계산.
     vec3 viewDir = normalize(viewPos - position);
@@ -46,7 +49,7 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, pixelNorm);
     // reflectDir과 viewDir 간의 내적을 통해 반사광을 많이 보는 정도를 계산
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = spec * material.specular * light.specular;
+    vec3 specular = spec * specColor * light.specular;
 
     vec3 result = ambient + diffuse + specular;
     fragColor = vec4(result, 1.0);

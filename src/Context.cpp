@@ -69,15 +69,12 @@ float vertices[] = { // pos.xyz, normal.xyz, texcoord.uv
         GL_STATIC_DRAW, indices, sizeof(uint32_t) * 36);
 
     // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
-    ShaderPtr vertShader = Shader::CreateFromFile("./shader/lighting.vs", GL_VERTEX_SHADER);
-    ShaderPtr fragShader = Shader::CreateFromFile("./shader/lighting.fs", GL_FRAGMENT_SHADER);
-    if (!vertShader || !fragShader)
+    m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
+    if (!m_simpleProgram)
         return false;
-    SPDLOG_INFO("vertex shader id: {}", vertShader->Get());
-    SPDLOG_INFO("fragment shader id: {}", fragShader->Get());
+    SPDLOG_INFO("program id: {}", m_simpleProgram->Get());
 
-    // program의 인자에는 sharedPtr로 들어가야하므로, 이에 맞춰서 설정하고, program을 생성함.
-    m_program = Program::Create({fragShader, vertShader});
+    m_program = Program::Create("./shader/lighting.vs", "./shader/lighting.fs");
     if (!m_program)
         return false;
     SPDLOG_INFO("program id: {}", m_program->Get());
@@ -97,6 +94,7 @@ float vertices[] = { // pos.xyz, normal.xyz, texcoord.uv
     auto image2 = Image::Load("./image/awesomeface.png");
     m_texture2 = Texture::CreateFromImage(image2.get());
 
+
     // 사용할 슬롯 번호를 알려준다.
     glActiveTexture(GL_TEXTURE0);
     // 세팅하려는 텍스처의 타입과, 해당 id를 바인딩한다.
@@ -104,6 +102,9 @@ float vertices[] = { // pos.xyz, normal.xyz, texcoord.uv
     // 슬롯을 1번으로 바꿔준다.
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
+
+    m_material.diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
+    m_material.specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
 
     m_program->Use();
     // glGetUniformLocation으로 location 값을 얻어와서, 2번째 인자를 통해 해당 슬롯을 이용하겠다는것을 shader에 알려준다.
@@ -144,9 +145,6 @@ void Context::Render() {
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::ColorEdit3("m.ambient", glm::value_ptr(m_material.ambient));
-            ImGui::ColorEdit3("m.diffuse", glm::value_ptr(m_material.diffuse));
-            ImGui::ColorEdit3("m.specular", glm::value_ptr(m_material.specular));
             ImGui::DragFloat("m.shininess", &m_material.shininess, 1.0f, 1.0f, 256.0f);
         }
         ImGui::Checkbox("animation", &m_animation);
@@ -193,12 +191,10 @@ void Context::Render() {
 
     auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
         glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
-    m_program->Use();
-    m_program->SetUniform("light.position", m_light.position);
-    m_program->SetUniform("light.ambient", m_light.diffuse);
-    m_program->SetUniform("material.ambient", m_light.diffuse);
-    m_program->SetUniform("transform", projection * view * lightModelTransform);
-    m_program->SetUniform("modelTransform", lightModelTransform);
+
+    m_simpleProgram->Use();
+    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     
     m_program->Use();
@@ -206,11 +202,15 @@ void Context::Render() {
     m_program->SetUniform("light.position", m_light.position);
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
-    m_program->SetUniform("light.specular", m_light.specular);
-    m_program->SetUniform("material.ambient", m_material.ambient);
-    m_program->SetUniform("material.diffuse", m_material.diffuse);
-    m_program->SetUniform("material.specular", m_material.specular);
+    // texture 슬롯의 번호 입력
+    m_program->SetUniform("light.specular", 0);
+    m_program->SetUniform("material.specular", 1);
     m_program->SetUniform("material.shininess", m_material.shininess);
+
+    glActiveTexture(GL_TEXTURE0);
+    m_material.diffuse->Bind();
+    glActiveTexture(GL_TEXTURE1);
+    m_material.specular->Bind();
 
     // 총 36개의 지점을 가지므로 36개가 필요
     for (size_t i = 0; i < cubePositions.size(); i++){
