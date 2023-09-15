@@ -202,8 +202,9 @@ void Context::Render() {
     m_program->SetUniform("light.position", m_light.position);
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
+    m_program->SetUniform("light.specular", m_light.specular);
     // texture 슬롯의 번호 입력
-    m_program->SetUniform("light.specular", 0);
+    m_program->SetUniform("material.diffuse", 0);
     m_program->SetUniform("material.specular", 1);
     m_program->SetUniform("material.shininess", m_material.shininess);
 
