@@ -11,6 +11,8 @@ uniform vec3 viewPos;
 struct Light {
     // 광원의 위치를 나타내므로 light struture에만 들어간다.
     vec3 position;
+    vec3 direction;
+    vec2 cutoff;
     vec3 attenuation;
     vec3 ambient;
     vec3 diffuse;
@@ -41,23 +43,32 @@ void main() {
     // 실질적으로는 Kc, Kl, Kq가 들어가는 형태가 된다.
     float attenuation = 1.0 / dot(distPoly, light.attenuation);
     vec3 lightDir = (light.position - position) / dist;
+    vec3 result = ambient;
     // 새로 입력된 vertex 의 normal vector
-    vec3 pixelNorm = normalize(normal);
-    // 빛의 크기를 구하되, pixelNorm과 lightDir의 내적 값을 계산하는데, 이 수치가 음수일때는 0으로 둠.
-    // 이후 material과 light의 diffuse와 곱해서 값을 구함.
-    float diff = max(dot(pixelNorm, lightDir), 0.0);
-    vec3 diffuse = diff * texColor * light.diffuse;
+    float theta = dot(lightDir, normalize(-light.direction));
+    // 내분점 공식을 쓰고, clamp 함수를 통해 0~1 사이의 값으로 만들어준다.
+    float intensity = clamp((theta - light.cutoff[1]) / (light.cutoff[0] - light.cutoff[1]), 0.0, 1.0);
 
-    vec3 specColor = texture(material.specular, texCoord).xyz;
-    // light direction을 구한 방식과 동일.
-    // 현재 카메라의 world space 상의 좌표와 픽셀 좌표 간의 차를 통해 시선 벡터 viewDir 계산.
-    vec3 viewDir = normalize(viewPos - position);
-    // light 벡터 방향의 광선이 normal 벡터 방향의 표면에 부딪혔을 때 반사되는 벡터를 출력하는 내장함수인 reflect 함수를 이용.
-    vec3 reflectDir = reflect(-lightDir, pixelNorm);
-    // reflectDir과 viewDir 간의 내적을 통해 반사광을 많이 보는 정도를 계산
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = spec * specColor * light.specular;
+    // theta값은 광원의 방향과 lightDir과 실제 광원의 direction을 내적한 값, 즉 cos 값을 계산한다.
+    // 해당 cos값이 지정한 cos 값보다 크단 말은 지정한 각도보다 작다는 말이며, 이 경우에만 spotlight에 대한 조명을 계산한다.
+    if (intensity > 0.0) {
+        vec3 pixelNorm = normalize(normal);
+        // 빛의 크기를 구하되, pixelNorm과 lightDir의 내적 값을 계산하는데, 이 수치가 음수일때는 0으로 둠.
+        // 이후 material과 light의 diffuse와 곱해서 값을 구함.
+        float diff = max(dot(pixelNorm, lightDir), 0.0);
+        vec3 diffuse = diff * texColor * light.diffuse;
 
-	vec3 result = (ambient + diffuse + specular) * attenuation;
+        vec3 specColor = texture(material.specular, texCoord).xyz;
+        // light direction을 구한 방식과 동일.
+        // 현재 카메라의 world space 상의 좌표와 픽셀 좌표 간의 차를 통해 시선 벡터 viewDir 계산.
+        vec3 viewDir = normalize(viewPos - position);
+        // light 벡터 방향의 광선이 normal 벡터 방향의 표면에 부딪혔을 때 반사되는 벡터를 출력하는 내장함수인 reflect 함수를 이용.
+        vec3 reflectDir = reflect(-lightDir, pixelNorm);
+        // reflectDir과 viewDir 간의 내적을 통해 반사광을 많이 보는 정도를 계산
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        vec3 specular = spec * specColor * light.specular;
+
+        result += (diffuse + specular) * intensity;
+    }
     fragColor = vec4(result, 1.0);
 }
