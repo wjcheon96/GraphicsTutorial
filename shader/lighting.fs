@@ -11,6 +11,7 @@ uniform vec3 viewPos;
 struct Light {
     // 광원의 위치를 나타내므로 light struture에만 들어간다.
     vec3 position;
+    vec3 attenuation;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -32,8 +33,14 @@ void main() {
     // 주변광 계산
     vec3 ambient = texColor * light.ambient;
 
-    // 빛의 방향
-    vec3 lightDir = normalize(light.position - position);
+    // 광원과 3D 위치간의 거리를 계산.
+    float dist = length(light.position - position);
+    // 각각 0차, 1차, 2차 항을 나타낸다.
+    vec3 distPoly = vec3(1.0, dist, dist * dist);
+    // distPoly와 light.attenuation을 내적한다.
+    // 실질적으로는 Kc, Kl, Kq가 들어가는 형태가 된다.
+    float attenuation = 1.0 / dot(distPoly, light.attenuation);
+    vec3 lightDir = (light.position - position) / dist;
     // 새로 입력된 vertex 의 normal vector
     vec3 pixelNorm = normalize(normal);
     // 빛의 크기를 구하되, pixelNorm과 lightDir의 내적 값을 계산하는데, 이 수치가 음수일때는 0으로 둠.
@@ -51,6 +58,6 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     vec3 specular = spec * specColor * light.specular;
 
-    vec3 result = ambient + diffuse + specular;
+	vec3 result = (ambient + diffuse + specular) * attenuation;
     fragColor = vec4(result, 1.0);
 }
