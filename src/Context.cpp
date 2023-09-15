@@ -178,8 +178,8 @@ void Context::Render() {
         glm::radians(m_cameraPitch), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     
     // 손전등 효과를 주는 방법
-    m_light.position = m_cameraPos;
-    m_light.direction = m_cameraFront;
+    // m_light.position = m_cameraPos;
+    // m_light.direction = m_cameraFront;
 
     auto cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
     auto cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -195,13 +195,13 @@ void Context::Render() {
     // // 종횡비 4:3, 세로화각 45도의 원근 투영
     auto projection = glm::perspective(glm::radians(45.0f),(float)m_width / (float)m_height, 0.01f, 50.0f);
 
-    // auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
-    //     glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
+        glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
 
-    // m_simpleProgram->Use();
-    // m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
-    // m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+    m_simpleProgram->Use();
+    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
