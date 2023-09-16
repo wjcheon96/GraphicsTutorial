@@ -2,6 +2,7 @@
 #define __CONTEXT_HPP__
 
 #include "Common.hpp"
+#include "Mesh.hpp"
 #include "Shader.hpp"
 #include "Program.hpp"
 #include "Buffer.hpp"
@@ -25,9 +26,10 @@ class Context {
 
         ProgramUPtr m_program;
         ProgramUPtr m_simpleProgram;
-        VertexLayoutUPtr m_vertexLayout;
-        BufferUPtr m_vertexBuffer;
-        BufferUPtr m_indexBuffer;
+        MeshUPtr m_box;
+        // VertexLayoutUPtr m_vertexLayout;
+        // BufferUPtr m_vertexBuffer;
+        // BufferUPtr m_indexBuffer;
         TextureUPtr m_texture;
         TextureUPtr m_texture2;
 

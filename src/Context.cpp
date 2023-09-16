@@ -1,5 +1,4 @@
 #include "Context.hpp"
-#include "GLFW/glfw3.h"
 #include "Image.hpp"
 #include <imgui.h>
 
@@ -15,58 +14,7 @@ ContextUPtr Context::Create() {
 bool Context::Init() {
     // 정점 데이터를 담은 array를 선언.
     // openGL화면은 가로 세로가 -1 ~ +1로 normalizing 된 좌표계를 사용한다.
-float vertices[] = { // pos.xyz, normal.xyz, texcoord.uv
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f,
-    };
-
-
-    uint32_t indices[] = {
-        0,  2,  1,  2,  0,  3,
-        4,  5,  6,  6,  7,  4,
-        8,  9, 10, 10, 11,  8,
-        12, 14, 13, 14, 12, 15,
-        16, 17, 18, 18, 19, 16,
-        20, 22, 21, 22, 20, 23,
-    };
-
-    m_vertexLayout = VertexLayout::Create();
-    m_vertexBuffer = Buffer::CreateWithData(GL_ARRAY_BUFFER, GL_STATIC_DRAW,
-        vertices, sizeof(float) * 8 * 6 * 4);
-
-    m_vertexLayout->SetAttrib(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, 0);
-    m_vertexLayout->SetAttrib(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 3);
-    m_vertexLayout->SetAttrib(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, sizeof(float) * 6);
-
-    m_indexBuffer = Buffer::CreateWithData(GL_ELEMENT_ARRAY_BUFFER,
-        GL_STATIC_DRAW, indices, sizeof(uint32_t) * 36);
+    m_box = Mesh::MakeBox();
 
     // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
     m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
@@ -201,6 +149,7 @@ void Context::Render() {
     m_simpleProgram->Use();
     m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
     m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+    m_box->Draw();
     glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     
     m_program->Use();
