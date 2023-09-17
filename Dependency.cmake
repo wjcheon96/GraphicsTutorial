@@ -141,8 +141,8 @@ if (APPLE)
 endif()
 if (WIN32)
     set(DEP_LIBS ${DEP_LIBS}
-        assimp-vc142-mt$<$<CONFIG:Debug>:d>
+        assimp-vc143-mt$<$<CONFIG:Debug>:d>
         zlibstatic$<$<CONFIG:Debug>:d>
         IrrXML$<$<CONFIG:Debug>:d>
-    )
+)
 endif()
