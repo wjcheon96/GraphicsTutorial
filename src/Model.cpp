@@ -7,7 +7,7 @@ ModelUPtr Model::Load(const std::string& filename) {
     return std::move(model);
 }
 
-// Assimp::Importer크ㄹ래스의 ReadFile 함수 이용.
+// Assimp::Importer클래스의 ReadFile 함수 이용.
 // scene->mRootNode부터 재귀적으로 처리.
 // Scene Tree상 이미지가 부모/자식 관계로 되어있기 때문.
 bool Model::LoadByAssimp(const std::string& filename) {
