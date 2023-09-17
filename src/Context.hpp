@@ -8,6 +8,7 @@
 #include "Buffer.hpp"
 #include "VertexLayout.hpp"
 #include "Texture.hpp"
+#include "Model.hpp"
 
 CLASS_PTR(Context)
 class Context {
@@ -55,6 +56,7 @@ class Context {
             glm::vec3 specular { glm::vec3(1.0f, 1.0f, 1.0f) };
         };
         Light m_light;
+        bool m_flashLightMode { false };
 
         // material parameter
         struct Material {
@@ -63,6 +65,7 @@ class Context {
             float shininess { 32.0f };
         };
         Material m_material;
+        ModelUPtr m_model;
     
         // camera parameter.
         // pitch 와 yaw에 대한 값 세팅.
@@ -75,3 +78,4 @@ class Context {
 };
 
 #endif
+ 

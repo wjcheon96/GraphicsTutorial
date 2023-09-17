@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
     src/Image.cpp src/Image.hpp
     src/Texture.cpp src/Texture.hpp
     src/Mesh.cpp src/Mesh.hpp
+    src/Model.cpp src/Model.hpp
 )
 
 # ExternalProject 관련 명령어 셋 추가

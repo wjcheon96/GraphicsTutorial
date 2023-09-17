@@ -59,3 +59,21 @@ Image::~Image() {
         stbi_image_free(m_data);
     }
 }
+
+// 단색 texture를 만든다.
+ImageUPtr Image::CreateSingleColorImage(int width, int height, const glm::vec4& color) {
+    // color를 uint8_t로 바꾸면서, color가 0 ~ 1 사이의 값으로 들어오므로, 255를 곱해서 0 ~ 255 사이의 값으로 만들어준다.
+    glm::vec4 clamped = glm::clamp(color * 255.0f, 0.0f, 255.0f);
+    uint8_t rgba[4] = {
+        (uint8_t)clamped.r, 
+        (uint8_t)clamped.g, 
+        (uint8_t)clamped.b, 
+        (uint8_t)clamped.a, 
+    };
+    // 4개의 채널을 가진 이미지를 만들어, 4byte씩 복사한다.
+    auto image = Create(width, height, 4);
+    for (int i = 0; i < width * height; i++) {
+        memcpy(image->m_data + 4 * i, rgba, 4);
+    }
+    return std::move(image);
+}

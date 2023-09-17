@@ -16,6 +16,10 @@ bool Context::Init() {
     // openGL화면은 가로 세로가 -1 ~ +1로 normalizing 된 좌표계를 사용한다.
     m_box = Mesh::MakeBox();
 
+    m_model = Model::Load("./resources/backpack.obj");
+    if (!m_model)
+        return false;
+
     // gl function이 생성된 이후에 쉐이더를 호출해서 사용해야함.
     m_simpleProgram = Program::Create("./shader/simple.vs", "./shader/simple.fs");
     if (!m_simpleProgram)
@@ -51,8 +55,16 @@ bool Context::Init() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, m_texture2->Get());
 
-    m_material.diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
-    m_material.specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
+    // 흰색 diffuse texture, 회색 specular texture 생성.
+    m_material.diffuse = Texture::CreateFromImage(
+    Image::CreateSingleColorImage(4, 4, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)).get());
+
+    m_material.specular = Texture::CreateFromImage(
+    Image::CreateSingleColorImage(4, 4, glm::vec4(0.5f, 0.5f, 0.5f, 1.0f)).get());
+
+
+    // m_material.diffuse = Texture::CreateFromImage(Image::Load("./image/container2.png").get());
+    // m_material.specular = Texture::CreateFromImage(Image::Load("./image/container2_specular.png").get());
 
     m_program->Use();
     // glGetUniformLocation으로 location 값을 얻어와서, 2번째 인자를 통해 해당 슬롯을 이용하겠다는것을 shader에 알려준다.
@@ -92,6 +104,7 @@ void Context::Render() {
             ImGui::ColorEdit3("l.ambient", glm::value_ptr(m_light.ambient));
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("l.specular", glm::value_ptr(m_light.specular));
+            ImGui::Checkbox("flash light", &m_flashLightMode);
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -100,20 +113,6 @@ void Context::Render() {
         ImGui::Checkbox("animation", &m_animation);
     }
     ImGui::End();
-
-    // 여러개의 큐브를 그리기 위해 벡터를 여러개를 생성함.
-    std::vector<glm::vec3> cubePositions = {
-        glm::vec3( 0.0f, 0.0f, 0.0f),
-        glm::vec3( 2.0f, 5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f, 3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f, 2.0f, -2.5f),
-        glm::vec3( 1.5f, 0.2f, -1.5f),
-        glm::vec3(-1.3f, 1.0f, -1.5f),
-    };
 
     // 실제 framebuffer를 clear함.
     // depth초기화
@@ -143,50 +142,46 @@ void Context::Render() {
     // // 종횡비 4:3, 세로화각 45도의 원근 투영
     auto projection = glm::perspective(glm::radians(45.0f),(float)m_width / (float)m_height, 0.01f, 50.0f);
 
-    auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
-        glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
+    glm::vec3 lightPos = m_light.position;
+    glm::vec3 lightDir = m_light.direction;
+    if (m_flashLightMode) {
+        lightPos = m_cameraPos;
+        lightDir = m_cameraFront;
+    } else {
+        auto lightModelTransform = glm::translate(glm::mat4(1.0), m_light.position) *
+            glm::scale(glm::mat4(1.0), glm::vec3(0.1f));
 
-    m_simpleProgram->Use();
-    m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
-    m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
-    m_box->Draw();
-    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    
+        m_simpleProgram->Use();
+        m_simpleProgram->SetUniform("color", glm::vec4(m_light.ambient + m_light.diffuse, 1.0f));
+        m_simpleProgram->SetUniform("transform", projection * view * lightModelTransform);
+        m_box->Draw(m_program.get());
+    }
+
     m_program->Use();
     m_program->SetUniform("viewPos", m_cameraPos);
-    m_program->SetUniform("light.position", m_light.position);
-    m_program->SetUniform("light.direction", m_light.direction);
-    m_program->SetUniform("light.cutoff", glm::vec2(cosf(glm::radians(m_light.cutoff[0])),
-        cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
+    m_program->SetUniform("light.position", lightPos);
+    m_program->SetUniform("light.direction", lightDir);
+    m_program->SetUniform("light.cutoff", glm::vec2(
+        cosf(glm::radians(m_light.cutoff[0])), cosf(glm::radians(m_light.cutoff[0] + m_light.cutoff[1]))));
     m_program->SetUniform("light.attenuation", GetAttenuationCoeff(m_light.distance));
     m_program->SetUniform("light.ambient", m_light.ambient);
     m_program->SetUniform("light.diffuse", m_light.diffuse);
     m_program->SetUniform("light.specular", m_light.specular);
-    // texture 슬롯의 번호 입력
+
     m_program->SetUniform("material.diffuse", 0);
     m_program->SetUniform("material.specular", 1);
     m_program->SetUniform("material.shininess", m_material.shininess);
-
     glActiveTexture(GL_TEXTURE0);
     m_material.diffuse->Bind();
     glActiveTexture(GL_TEXTURE1);
     m_material.specular->Bind();
 
-    // 총 36개의 지점을 가지므로 36개가 필요
-    for (size_t i = 0; i < cubePositions.size(); i++){
-        auto& pos = cubePositions[i];
-        auto model = glm::translate(glm::mat4(1.0f), pos);
-        auto angle = glm::radians((m_animation ? (float)glfwGetTime() : 0.0f) * 120.0f + 20.0f * (float)i);
-        model = glm::rotate(model, m_animation ? angle : 0.0f,
-            glm::vec3(1.0f, 0.5f, 0.0f));
-        //모델 회전을 위한 부분
-        // model = glm::rotate(model, glm::radians((float)glfwGetTime() * 120.0f + 20.0f * (float)i),
-        //     glm::vec3(0.0f, 3.0f, 0.0f));
-        auto transform = projection * view * model;
-        m_program->SetUniform("transform", transform);
-        m_program->SetUniform("modelTransform", model);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-    }
+    auto modelTransform = glm::mat4(1.0f);
+    auto transform = projection * view * modelTransform;
+    m_program->SetUniform("transform", transform);
+    m_program->SetUniform("modelTransform", modelTransform);
+    m_model->Draw(m_program.get());
+
 }
 
 // 키 입력에 따라상 하 좌 우 에 대해 이동을 하게끔 한다.
