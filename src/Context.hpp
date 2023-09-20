@@ -66,7 +66,9 @@ class Context {
         };
         Material m_material;
         ModelUPtr m_model;
-    
+        
+        bool m_blinn { false };
+
         // camera parameter.
         // pitch 와 yaw에 대한 값 세팅.
         float m_cameraPitch { 0.0f };

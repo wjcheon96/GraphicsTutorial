@@ -7,6 +7,9 @@ out vec4 fragColor;
 
 uniform vec3 viewPos;
 
+// blinn shading 방식을 사용할 것인지를 체크.
+uniform int blinn;
+
 // 구조체에 담에서 하나로 묶는다.
 struct Light {
     // 광원의 위치를 나타내므로 light struture에만 들어간다.
@@ -59,15 +62,23 @@ void main() {
         vec3 diffuse = diff * texColor * light.diffuse;
 
         vec3 specColor = texture(material.specular, texCoord).xyz;
-        // light direction을 구한 방식과 동일.
-        // 현재 카메라의 world space 상의 좌표와 픽셀 좌표 간의 차를 통해 시선 벡터 viewDir 계산.
-        vec3 viewDir = normalize(viewPos - position);
-        // light 벡터 방향의 광선이 normal 벡터 방향의 표면에 부딪혔을 때 반사되는 벡터를 출력하는 내장함수인 reflect 함수를 이용.
-        vec3 reflectDir = reflect(-lightDir, pixelNorm);
-        // reflectDir과 viewDir 간의 내적을 통해 반사광을 많이 보는 정도를 계산
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        float spec = 0.0;
+        if (blinn == 0) {
+            // light direction을 구한 방식과 동일.
+            // 현재 카메라의 world space 상의 좌표와 픽셀 좌표 간의 차를 통해 시선 벡터 viewDir 계산.
+            vec3 viewDir = normalize(viewPos - position);
+            // light 벡터 방향의 광선이 normal 벡터 방향의 표면에 부딪혔을 때 반사되는 벡터를 출력하는 내장함수인 reflect 함수를 이용.
+            vec3 reflectDir = reflect(-lightDir, pixelNorm);
+            // reflectDir과 viewDir 간의 내적을 통해 반사광을 많이 보는 정도를 계산
+            spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+        }
+        // blinn 방식을 사용.
+        else {
+            vec3 viewDir = normalize(viewPos - position);
+            vec3 halfDir = normalize(lightDir + viewDir);
+            spec = pow(max(dot(halfDir, pixelNorm), 0.0), material.shininess);
+        }
         vec3 specular = spec * specColor * light.specular;
-
         result += (diffuse + specular) * intensity;
     }
     fragColor = vec4(result, 1.0);

@@ -105,6 +105,7 @@ void Context::Render() {
             ImGui::ColorEdit3("l.diffuse", glm::value_ptr(m_light.diffuse));
             ImGui::ColorEdit3("l.specular", glm::value_ptr(m_light.specular));
             ImGui::Checkbox("flash light", &m_flashLightMode);
+            ImGui::Checkbox("l.blinn", &m_blinn);
         }
 
         if (ImGui::CollapsingHeader("material", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -171,6 +172,7 @@ void Context::Render() {
     m_program->SetUniform("material.diffuse", 0);
     m_program->SetUniform("material.specular", 1);
     m_program->SetUniform("material.shininess", m_material.shininess);
+    m_program->SetUniform("blinn", (m_blinn ? 1 : 0));
     glActiveTexture(GL_TEXTURE0);
     m_material.diffuse->Bind();
     glActiveTexture(GL_TEXTURE1);
