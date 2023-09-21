@@ -81,5 +81,6 @@ void main() {
         vec3 specular = spec * specColor * light.specular;
         result += (diffuse + specular) * intensity;
     }
+    result *= attenuation;
     fragColor = vec4(result, 1.0);
 }
