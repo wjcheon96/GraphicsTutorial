@@ -1,5 +1,5 @@
-## SCOP
+## OBJ VIEWER Tutorial
 
-cmake -S . 로 cmake 실행 후, make로 scop 라는 파일 생성.
+Assmip library를 활용한 object viewer 제작.
 
-lib/ 내부의 glfw library만 칩에 맞게끔 설정해주면 됨.
+OpenGL의 기본적인 사용법 및 라이브러리 사용을 통한 그래픽스 파이프라인 제작.
